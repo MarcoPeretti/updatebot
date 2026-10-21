@@ -9,6 +9,7 @@
   "dependencyDashboard": true,
   "minimumReleaseAge": "5 days",
   "internalChecksFilter": "flexible",
+  "rebaseWhen": "behind-base-branch",
   "schedule": ["* * * * 0,6"],
   "automergeType": "pr",
   "automergeStrategy": "squash",
