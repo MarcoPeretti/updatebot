@@ -1,0 +1,70 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Shared Renovate policy for MarcoPeretti/* repos. Consume with: { \"extends\": [\"github>MarcoPeretti/updatebot\"] }",
+  "extends": [
+    "config:best-practices",
+    "helpers:pinGitHubActionDigests",
+    ":semanticCommitsDisabled"
+  ],
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "5 days",
+  "internalChecksFilter": "flexible",
+  "schedule": ["* * * * 0,6"],
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["* * * * 0,6"]
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["dependencies", "security"],
+    "minimumReleaseAge": "5 days",
+    "automerge": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "description": "Patch/minor/digest updates merge themselves once CI is green",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "automerge": true
+    },
+    {
+      "description": "Majors: never automerge, batch monthly",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "schedule": ["before 6am on the first day of the month"],
+      "labels": ["dependencies", "major"]
+    },
+    {
+      "description": "Infra and images are applied/deployed by hand: PR only",
+      "matchManagers": ["terraform", "terraform-version", "dockerfile", "docker-compose"],
+      "automerge": false
+    },
+    {
+      "description": "Svelte ecosystem in one PR",
+      "matchPackageNames": ["svelte", "svelte-check", "vite", "@sveltejs/**"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "svelte toolchain"
+    },
+    {
+      "description": "Lint/test/type tooling in one PR",
+      "matchPackageNames": ["eslint", "eslint-*", "@eslint/**", "typescript-eslint", "prettier", "prettier-*", "vitest", "@vitest/**", "typescript", "@types/**", "@playwright/test"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "lint, test and type tooling"
+    },
+    {
+      "description": "Go minor/patch in one PR",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "go minor/patch"
+    },
+    {
+      "description": "GitHub Actions in one PR",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
+    }
+  ]
+}

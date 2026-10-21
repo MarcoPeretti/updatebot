@@ -1,0 +1,33 @@
+name: ci-go
+
+# Reusable CI for a Go module: format, vet, race tests, govulncheck.
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        type: string
+        default: .
+        description: Directory containing go.mod
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ${{ inputs.working-directory }}/go.mod
+          cache-dependency-path: ${{ inputs.working-directory }}/go.sum
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+      - run: go vet ./...
+      - run: go test -race ./...
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...

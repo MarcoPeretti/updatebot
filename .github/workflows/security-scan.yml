@@ -1,0 +1,54 @@
+name: security-scan
+
+# Reusable. Each repo calls this from its own weekly `schedule:` workflow so
+# already-installed dependencies are re-checked between Renovate runs.
+#   govulncheck: only reports vulnerabilities in code paths actually reachable
+#   osv-scanner: lockfile scan for npm/pnpm, reported as a failing job
+
+on:
+  workflow_call:
+    inputs:
+      go-modules:
+        type: string
+        default: ""
+        description: Space-separated directories containing go.mod (empty to skip Go)
+      scan-lockfiles:
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    if: inputs.go-modules != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - name: govulncheck each module
+        env:
+          MODULES: ${{ inputs.go-modules }}
+        run: |
+          rc=0
+          for d in $MODULES; do
+            echo "::group::$d"
+            (cd "$d" && go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...) || rc=1
+            echo "::endgroup::"
+          done
+          exit $rc
+
+  osv-scanner:
+    if: inputs.scan-lockfiles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - name: osv-scanner
+        run: go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.0.0 scan source --recursive .

@@ -1,0 +1,30 @@
+name: quarterly-reminders
+
+# Runtime settings Renovate cannot see. Opens one checklist issue per quarter.
+
+on:
+  schedule:
+    - cron: "0 6 1 1,4,7,10 *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open checklist issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          quarter="$(date -u +%Y)-Q$(( ($(date -u +%-m) - 1) / 3 + 1 ))"
+          gh issue create --title "Runtime check $quarter" --body "$(cat <<'EOF'
+          - [ ] Cloudflare `compatibility_date` bumped and tested: unspam (`workers/`, `site/`, `lab/`), knull
+          - [ ] AWS Lambda runtimes not deprecated within 6 months: mailsrv (`infra/lambda/*`, backend), ll
+          - [ ] Terraform PRs from Renovate reviewed and applied by hand: mailsrv, ll
+          - [ ] Open `major` Renovate PRs reviewed (monthly batch), fleet kept on the same Svelte/React/Vite/Go majors
+          - [ ] Merged-but-undeployed Renovate updates: unspam, knull, mailsrv backend, ll backend
+          EOF
+          )"
