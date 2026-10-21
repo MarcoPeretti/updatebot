@@ -45,6 +45,11 @@
       "automerge": false
     },
     {
+      "description": "Go toolchain version bumps stay manual: Dockerfile Go images are bumped separately",
+      "matchDatasources": ["golang-version"],
+      "automerge": false
+    },
+    {
       "description": "Svelte ecosystem in one PR",
       "matchPackageNames": ["svelte", "svelte-check", "vite", "@sveltejs/**"],
       "matchUpdateTypes": ["minor", "patch"],
