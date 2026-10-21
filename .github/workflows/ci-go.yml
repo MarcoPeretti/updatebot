@@ -24,6 +24,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: ${{ inputs.working-directory }}/go.mod
+          check-latest: true
           cache-dependency-path: ${{ inputs.working-directory }}/go.sum
       - name: gofmt
         run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
